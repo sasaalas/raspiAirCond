@@ -1,6 +1,8 @@
 #!/usr/bin/python
 
-import smbus
+from smbus2 import SMBus
+import syslog
+import sys
 
 # ===========================================================================
 # Raspi_I2C Base Class
@@ -8,7 +10,7 @@ import smbus
 
 class Raspi_I2C :
 
-  def __init__(self, address, bus=smbus.SMBus(1), debug=False):
+  def __init__(self, address, bus=SMBus(1), debug=False):
     self.address = address
     self.bus = bus
     self.debug = debug
@@ -28,72 +30,58 @@ class Raspi_I2C :
   def write8(self, reg, value):
     "Writes an 8-bit value to the specified register/address"
     try:
-      self.bus.write_byte_data(self.address, reg, value)
-      #if (self.debug):
-       # print "I2C: Wrote 0x%02X to register 0x%02X" % (value, reg)
+      self.bus.write_byte_data(self.address, reg, value)              
     except IOError:
-      #print "Error accessing 0x%02X: Check your I2C address" % self.address
+      syslog.syslog(syslog.LOG_ERR, "I2C: Error accessing register. Check your I2C address")
       return -1
 
   def writeList(self, reg, list):
     "Writes an array of bytes using I2C format"
-    try:
-      #if (self.debug):
-        #print "I2C: Writing list to register 0x%02X:" % reg
-        #print list
+    try:      
       self.bus.write_i2c_block_data(self.address, reg, list)
     except IOError:
-      #print "Error accessing 0x%02X: Check your I2C address" % self.address
+      syslog.syslog(syslog.LOG_ERR, "I2C: Error accessing register. Check your I2C address")
       return -1
 
   def readList(self, reg, length):
     "Read a list of bytes from the I2C device"
     results = []
     try:
-      results = self.bus.read_i2c_block_data(self.address, reg, length)
-      #if (self.debug):
-        #print "I2C: Device 0x%02X returned the following from reg 0x%02X" % (self.address, reg)
-        #print results
+      results = self.bus.read_i2c_block_data(self.address, reg, length)      
       return results
     except IOError:
-      #print "Error accessing 09x%02X: Check your I2C address" % self.address
+      syslog.syslog(syslog.LOG_ERR, "I2C: Error accessing register. Check your I2C address")
       return -1
 
   def readU8(self, reg):
     "Read an unsigned byte from the I2C device"
     try:
-      result = self.bus.read_byte_data(self.address, reg)
-      #if (self.debug):
-        #print "I2C: Device 0x%02X returned 0x%02X from reg 0x%02X" % (self.address, result & 0xFF, reg)
+      result = self.bus.read_byte_data(self.address, reg)      
       return result
     except IOError:
-      #print "Error accessing 0x%02X: Check your I2C address" % self.address
+      syslog.syslog(syslog.LOG_ERR, "I2C: Error accessing register. Check your I2C address")
       return -1
 
   def readS8(self, reg):
     "Reads a signed byte from the I2C device"
     try:
-      result = self.bus.read_byte_data(self.address, reg)
-      #if (self.debug):
-        #print "I2C: Device 0x%02X returned 0x%02X from reg 0x%02X" % (self.address, result & 0xFF, reg)
+      result = self.bus.read_byte_data(self.address, reg)      
       if (result > 127):
         return result - 256
       else:
         return result
     except IOError:
-      #print "Error accessing 0x%02X: Check your I2C address" % self.address
+      syslog.syslog(syslog.LOG_ERR, "I2C: Error accessing register. Check your I2C address")
       return -1
 
   def readU16(self, reg):
     "Reads an unsigned 16-bit value from the I2C device"
     try:
       hibyte = self.bus.read_byte_data(self.address, reg)
-      result = (hibyte << 8) + self.bus.read_byte_data(self.address, reg+1)
-      #if (self.debug):
-        #print "I2C: Device 0x%02X returned 0x%04X from reg 0x%02X" % (self.address, result & 0xFFFF, reg)
+      result = (hibyte << 8) + self.bus.read_byte_data(self.address, reg+1)      
       return result
     except IOError:
-      #print "Error accessing 0x%02X: Check your I2C address" % self.address
+      syslog.syslog(syslog.LOG_ERR, "I2C: Error accessing register. Check your I2C address")
       return -1
 
   def readS16(self, reg):
@@ -102,10 +90,8 @@ class Raspi_I2C :
       hibyte = self.bus.read_byte_data(self.address, reg)
       if (hibyte > 127):
         hibyte -= 256
-      result = (hibyte << 8) + self.bus.read_byte_data(self.address, reg+1)
-      #if (self.debug):
-       # print "I2C: Device 0x%02X returned 0x%04X from reg 0x%02X" % (self.address, result & 0xFFFF, reg)
+      result = (hibyte << 8) + self.bus.read_byte_data(self.address, reg+1)      
       return result
     except IOError:
-     # print "Error accessing 0x%02X: Check your I2C address" % self.address
-      return -1
+      syslog.syslog(syslog.LOG_ERR, "I2C: Error accessing register. Check your I2C address")
+      return -1 
