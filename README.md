@@ -1,8 +1,10 @@
 # raspiAirCond
-Tested with Raspbian GNU/Linux 9 (stretch) and Raspbian GNU/Linux 10 (buster)
+Tested with:
+-Raspbian GNU/Linux 9 (stretch) and Python 3.5.3
+-Raspbian GNU/Linux 10 (buster) and Python 3.7.3
 
 Preconditions:
-1. There is MQTT broker available. In this example RabbitMQ with MQTT -plugin is running at 192.168.0.2/1883. MQTT -username and -password must be set in mqttHomeListener.py.
+1. There is MQTT broker available (see wiki). In this example RabbitMQ with MQTT -plugin is running at 192.168.0.2/1883. MQTT -username and -password must be set in mqttHomeListener.py.
 2. I2C is enabled. This can be done using Raspberry Pi Configuration -utility.
 
 Running:
