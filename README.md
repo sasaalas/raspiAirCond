@@ -1,3 +1,6 @@
+DISCLAIMER:
+Code in pwmServoDriver -folder is slightly modified version of original version which can be found from various sources from Internet. I do not know who is the original author.
+
 # raspiAirCond
 Tested with Raspbian Stretch (Python 3.5.3) and with Raspbian Buster (Python 3.7.3)
 
