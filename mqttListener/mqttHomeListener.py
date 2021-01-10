@@ -1,20 +1,20 @@
 import argparse
 import paho.mqtt.client as mqtt
 import threading
-
+import signal
+import time
 import sys, os.path
 servo_dir = (os.path.abspath(os.path.join(os.path.dirname(__file__), '..')) + '/pwmServoDriver/')
 sys.path.append(servo_dir)
 from Raspi_PWM_Servo_Driver import PWM
 
 loop_flag = 1
-fail_count = 0
 user_exit = False
 
 servo_min = 150  # Min pulse length out of 4096
 servo_max = 600  # Max pulse length out of 4096
 max_degree = 60  # Degrees your servo can rotate
-default_degree = 30
+
 mqttUserName = "your-broker-username-here"
 mqttPassword = "your-broker-password-here"
 
@@ -31,7 +31,6 @@ class SummingThread(threading.Thread):
          self.finaldegree=finaldegree
 
      def run(self):
-         print("mqttListener: thread sleeping...")
          time.sleep(self.sleeptime)
          user_degree = self.finaldegree         
          set_degree(0, user_degree)
@@ -44,7 +43,7 @@ def set_degree(channel, d):
     
 
 def set_timed_degree(channel, d, sleeptime):
-    print("mqttListener: Setting servo degree from timer")
+    print("mqttListener: Setting timer for setting servo degree.")
     set_degree(channel, d)
     sleeptime = 300
     finaldegree = 30    
@@ -79,11 +78,11 @@ def on_message(client, userdata, message):
     the_int_string = message.payload.decode("utf-8")
     the_int = safe_cast(message.payload, int)  # will return None
     if the_int is None:
-        print("mqttListener: Payload is None. Returning")
+        print("mqttListener: Payload is None. Returning.")
         return
 
     if message.retain == 1:
-        print("mqttListener: Message retain is 1. Returning")
+        print("mqttListener: Message retain is 1. Returning.")
         return
 
     if message.topic == "home/technical/setHeating":        
@@ -93,24 +92,25 @@ def on_message(client, userdata, message):
         the_topic = "home/technical/airCond"
         client.publish(the_topic, the_int, 0, True)
     else:
-        print("mqttListener: Received unknown topic")
+        print("mqttListener: Received unknown topic.")
 
 def on_handlesignal(param1, param2):
     global user_exit
+    print("mqttListener: Received on_handlesignal.")
     user_exit = True
     global loop_flag
     loop_flag = 0    
 
 def on_connect(client, userdata, flags, rc):
-    global fail_count
-    fail_count = 0
+    print("mqttListener: Received on_connect.")
 
 def on_disconnect(client, userdata,rc=0):
     global loop_flag
+    print("mqttListener: Received on_disconnect.")
     loop_flag = 0
     
     if user_exit == True:
-      print("mqttListener: Received user exit. Returning")
+      print("mqttListener: Received user exit. Returning.")
       return        
 
 def performConnect():
@@ -122,7 +122,7 @@ def performConnect():
     
     theIntPort = safe_cast(brokerPort, int)
     if theIntPort is None:
-        print("mqttListener: Invalid brokerPort. Returning")
+        print("mqttListener: Invalid brokerPort. Returning.")
         return
         
     client.connect(brokerUrl, theIntPort)
@@ -146,7 +146,6 @@ def main(brokerUrl, brokerPort):
 
     client.disconnect()
     client.loop_stop()
-
 
 parser = argparse.ArgumentParser(description='main')
 parser.add_argument('--brokerUrl', required=True, type=str)
