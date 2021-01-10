@@ -4,10 +4,9 @@ import sys, os.path
 servo_dir = (os.path.abspath(os.path.join(os.path.dirname(__file__), '..')) + '/pwmServoDriver/')
 sys.path.append(servo_dir)
 from Raspi_PWM_Servo_Driver import PWM
-
+import paho.mqtt.client as mqtt
 import time
 import syslog
-import paho.mqtt.client as mqtt
 
 syslog.openlog(sys.argv[0])
  
